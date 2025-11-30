@@ -5,7 +5,7 @@ from tkinter import ttk, messagebox, scrolledtext, simpledialog
 import re
 
 class SocialMediaApp:
-    def __init__(self, root):
+    def _init_(self, root):
         self.root = root
         self.root.title("Social Media Database Management")
         self.root.geometry("800x600")
@@ -30,7 +30,6 @@ class SocialMediaApp:
             self.root.quit()
 
     def create_widgets(self):
-        # Menu frame
         menu_frame = ttk.LabelFrame(self.root, text="Menu Options")
         menu_frame.pack(padx=10, pady=10, fill="x")
 
@@ -48,85 +47,68 @@ class SocialMediaApp:
         ttk.Combobox(menu_frame, textvariable=self.choice_var, values=options, state="readonly").pack(pady=5)
         ttk.Button(menu_frame, text="Execute", command=self.execute_choice).pack(pady=5)
 
-        # Output area
         self.output_text = scrolledtext.ScrolledText(self.root, height=20, width=80)
         self.output_text.pack(padx=10, pady=10, fill="both", expand=True)
 
-        # Exit button
         ttk.Button(self.root, text="Exit", command=self.root.quit).pack(pady=5)
 
     def validate_email(self, email):
-        """Validate email format."""
         pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
         return bool(re.match(pattern, email))
 
     def validate_ip(self, ip):
-        """Validate IP address format."""
         pattern = r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
         return bool(re.match(pattern, ip)) and all(0 <= int(part) <= 255 for part in ip.split('.'))
 
     def check_unique_username(self, username):
-        """Check if username is unique."""
         self.cursor.execute("SELECT username FROM users WHERE username = %s", (username,))
         return self.cursor.fetchone() is None
 
     def check_unique_email(self, email):
-        """Check if email is unique."""
         self.cursor.execute("SELECT email FROM users WHERE email = %s", (email,))
         return self.cursor.fetchone() is None
 
     def check_user_exists(self, user_id):
-        """Check if user_id exists."""
         self.cursor.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
         return self.cursor.fetchone() is not None
 
     def check_post_exists(self, post_id):
-        """Check if post_id exists."""
         self.cursor.execute("SELECT post_id FROM posts WHERE post_id = %s", (post_id,))
         return self.cursor.fetchone() is not None
 
     def check_photo_exists(self, photo_id):
-        """Check if photo_id exists."""
         self.cursor.execute("SELECT photo_id FROM photos WHERE photo_id = %s", (photo_id,))
         return self.cursor.fetchone() is not None
 
     def check_video_exists(self, video_id):
-        """Check if video_id exists."""
         self.cursor.execute("SELECT video_id FROM videos WHERE video_id = %s", (video_id,))
         return self.cursor.fetchone() is not None
 
     def check_follow_exists(self, follower_id, followee_id):
-        """Check if follow relationship exists."""
         self.cursor.execute("SELECT follower_id, followee_id FROM follows WHERE follower_id = %s AND followee_id = %s", (follower_id, followee_id))
         return self.cursor.fetchone() is not None
 
     def check_comment_exists(self, comment_id):
-        """Check if comment_id exists."""
         self.cursor.execute("SELECT comment_id FROM comments WHERE comment_id = %s", (comment_id,))
         return self.cursor.fetchone() is not None
 
     def check_post_like_exists(self, user_id, post_id):
-        """Check if post_like pair exists."""
         self.cursor.execute("SELECT user_id, post_id FROM post_likes WHERE user_id = %s AND post_id = %s", (user_id, post_id))
         return self.cursor.fetchone() is not None
 
     def check_comment_like_exists(self, user_id, comment_id):
-        """Check if comment_like pair exists."""
         self.cursor.execute("SELECT user_id, comment_id FROM comment_likes WHERE user_id = %s AND comment_id = %s", (user_id, comment_id))
         return self.cursor.fetchone() is not None
 
     def check_login_exists(self, login_id):
-        """Check if login_id exists."""
         self.cursor.execute("SELECT login_id FROM login WHERE login_id = %s", (login_id,))
         return self.cursor.fetchone() is not None
 
     def check_post_like_unique(self, user_id, post_id):
-        """Check if post_like pair is unique."""
         self.cursor.execute("SELECT user_id, post_id FROM post_likes WHERE user_id = %s AND post_id = %s", (user_id, post_id))
         return self.cursor.fetchone() is None
 
     def check_comment_like_unique(self, user_id, comment_id):
-        """Check if comment_like pair is unique."""
         self.cursor.execute("SELECT user_id, comment_id FROM comment_likes WHERE user_id = %s AND comment_id = %s", (user_id, comment_id))
         return self.cursor.fetchone() is None
 
@@ -610,12 +592,13 @@ class SocialMediaApp:
         except Error as e:
             self.output_text.insert(tk.END, f"Error executing procedure: {e}\n")
 
-    def __del__(self):
+    def _del_(self):
         if self.conn and self.conn.is_connected():
             self.cursor.close()
             self.conn.close()
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     root = tk.Tk()
     app = SocialMediaApp(root)
+
     root.mainloop()

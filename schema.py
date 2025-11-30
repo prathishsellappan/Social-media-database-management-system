@@ -3,7 +3,6 @@ from mysql.connector import Error
 
 def create_database_and_tables():
     try:
-        # Connect to MySQL 
         connection = mysql.connector.connect(
             host='localhost',
             user='root',
@@ -11,11 +10,9 @@ def create_database_and_tables():
         )
         cursor = connection.cursor()
 
-        # Create database
         cursor.execute("CREATE DATABASE IF NOT EXISTS social_media")
         cursor.execute("USE social_media")
 
-        # Create audit_log table
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS audit_log (
             audit_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -26,7 +23,6 @@ def create_database_and_tables():
         )
         """)
 
-        # Create tables with ON DELETE CASCADE
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -126,7 +122,6 @@ def create_database_and_tables():
         )
         """)
 
-        # Create triggers for deletions
         cursor.execute("""
         DELIMITER //
         CREATE TRIGGER after_user_delete
@@ -235,7 +230,6 @@ def create_database_and_tables():
         DELIMITER ;
         """)
 
-        # Create stored procedures
         cursor.execute("""
         DELIMITER //
         CREATE PROCEDURE insert_user(
@@ -249,7 +243,6 @@ def create_database_and_tables():
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Username or email already exists';
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting user';
-                
             INSERT INTO users (username, email, profile_photo_url, bio)
             VALUES (p_username, p_email, COALESCE(p_profile_photo_url, 'https://picsum.photos/200'), p_bio);
         END //
@@ -266,7 +259,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting post';
-                
             INSERT INTO posts (user_id, caption, location)
             VALUES (p_user_id, p_caption, p_location);
         END //
@@ -283,7 +275,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting photo';
-                
             IF p_photo_size >= 5 THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Photo size must be less than 5';
             END IF;
@@ -303,7 +294,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting video';
-                
             IF p_video_size >= 10 THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Video size must be less than 10';
             END IF;
@@ -322,7 +312,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting follow';
-                
             IF p_follower_id = p_followee_id THEN
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User cannot follow themselves';
             END IF;
@@ -342,7 +331,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting comment';
-                
             INSERT INTO comments (post_id, user_id, content)
             VALUES (p_post_id, p_user_id, p_content);
         END //
@@ -358,7 +346,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting post like';
-                
             INSERT INTO post_likes (user_id, post_id)
             VALUES (p_user_id, p_post_id);
         END //
@@ -374,7 +361,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting comment like';
-                
             INSERT INTO comment_likes (user_id, comment_id)
             VALUES (p_user_id, p_comment_id);
         END //
@@ -390,14 +376,12 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error inserting login';
-                
             INSERT INTO login (user_id, ip)
             VALUES (p_user_id, p_ip);
         END //
         DELIMITER ;
         """)
 
-        # Create delete stored procedures
         cursor.execute("""
         DELIMITER //
         CREATE PROCEDURE delete_user(
@@ -406,7 +390,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error deleting user';
-                
             DELETE FROM users WHERE user_id = p_user_id;
         END //
         DELIMITER ;
@@ -420,7 +403,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error deleting post';
-                
             DELETE FROM posts WHERE post_id = p_post_id;
         END //
         DELIMITER ;
@@ -434,7 +416,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error deleting photo';
-                
             DELETE FROM photos WHERE photo_id = p_photo_id;
         END //
         DELIMITER ;
@@ -448,7 +429,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error deleting video';
-                
             DELETE FROM videos WHERE video_id = p_video_id;
         END //
         DELIMITER ;
@@ -463,7 +443,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error deleting follow';
-                
             DELETE FROM follows WHERE follower_id = p_follower_id AND followee_id = p_followee_id;
         END //
         DELIMITER ;
@@ -477,7 +456,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error deleting comment';
-                
             DELETE FROM comments WHERE comment_id = p_comment_id;
         END //
         DELIMITER ;
@@ -492,7 +470,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error deleting post like';
-                
             DELETE FROM post_likes WHERE user_id = p_user_id AND post_id = p_post_id;
         END //
         DELIMITER ;
@@ -507,7 +484,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error deleting comment like';
-                
             DELETE FROM comment_likes WHERE user_id = p_user_id AND comment_id = p_comment_id;
         END //
         DELIMITER ;
@@ -521,7 +497,6 @@ def create_database_and_tables():
         BEGIN
             DECLARE EXIT HANDLER FOR SQLEXCEPTION
                 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error deleting login';
-                
             DELETE FROM login WHERE login_id = p_login_id;
         END //
         DELIMITER ;
